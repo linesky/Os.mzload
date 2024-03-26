@@ -9,9 +9,15 @@ x:    dd 0
 y:     dd 0
 color dd 07h
 MAIN:
+mov sp,0ffffh
+mov ax,cs
+mov ss,ax
+mov ax,cs
+mov es,ax
+mov ds,ax
 call backs
-jmp getstrs
-          mov si,endf
+
+          mov si,endf2
           mov ax,cs
           call mem32
           mov edi,eax
@@ -27,9 +33,7 @@ jmp getstrs
          call cprint                 
 mov bx,endf
 mov cx,79
-call getstr
-getstrs: 
-
+;call getstr
          mov bx,endf
          call len
          mov cx,2
@@ -62,7 +66,7 @@ getstrs:
          cs
          mov [bx],dx
          escpp2:
-                   
+                    
 call backs
 
 
@@ -478,8 +482,8 @@ loads:
 	add ax,bx
 	push ax
 	mov ds,ax
-	mov bx,100
-	mov al,0xcb
+	mov bx,0
+	mov al,0
 	mov cx,1024
 	fori:
 	    
@@ -503,7 +507,7 @@ reads:
 
 ;read file	
         mov ax,7
-        mov bx,100h
+        mov bx,0
         pop es
         push es
 	int 0x22
@@ -515,20 +519,45 @@ pop es
 mov ax,es
 mov ds,ax
 ;----------------------------------
-;----------------------------------
 mov ax,ds
+mov bx,0x0
+ds
+mov al,[bx]
+cmp al,'M'
+jnz printe
+;----------------------------------
+;cs load
+mov ax,ds
+mov bx,0x8
+ds
+mov cx,[bx]
+add ax,cx
+mov bx,0x16
+ds
+mov cx,[bx]
+add ax,cx
 mov si,ax
 ;----------------------------------
-mov di,100h
+;ip load
+mov bx,0x14
+ds
+mov cx,[bx]
+mov di,cx
 ;----------------------------------
 ;ss load
 mov ax,ds
 mov sp,0xFFFF
 mov bx,0x0e
-
-mov ax,ds
+ds
+mov cx,[bx]
+add ax,cx
 mov ss,ax
 ;----------------------------------
+;sp load
+mov bx,0x10
+ds
+mov cx,[bx]
+mov sp,cx
 ;----------------------------------
 mov ax,cs
 push ax
@@ -721,4 +750,5 @@ errors db "file not found",13,10,0
 exch dd 0
 spc db " ",0
 str2 db 13,10,">"
-endf db "LOAD.EXE",0
+endf db "load.exe",0
+endf2 db "

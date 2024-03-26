@@ -1,46 +1,84 @@
-format mz
-           
-                          
+format mz                
 start:
 JMP MAIN                
 sourcetext dd 1
 destenytext dd 1
 x:    dd 0     
 y:     dd 0
+hesvalue1: dw 0,0,0,0,0,0,0,0
+hesvalue2: dw 0,0,0,0,0,0,0,0
+color dd 07h
 MAIN:   		
-          call clears
-          
-                           
-          mov si,text1
-          inc si
-          mov ax,cs
-          call mem32
-                          
-          mov esi,eax
-          mov ecx,16
-          mov ax,1                
-                          
-                          
-          FOR1:     cs           
-                    mov [x],al                
-                    cs
-                    mov [y],al                
-                    call print32
-                    inc ax                
-                    cmp ax,16
-                    JB FOR1                   
+          call backs
+mov cl,0                
+          FOR1:                
+                                    
+                                    
+                    mov ah,2                
+                    int 1ah 
+                                   
+                    push dx                
+                    push cx                
+                    push cx                
+                                    
+                    pop ax
+                                    
+                    mov al,ah
+                    mov di,hesvalue1
+                    call hex 
+                    mov cx,2
+                            
+                    mov bx,hesvalue1
+                    call cprint
+                    mov cx,1
+                            
+                    mov bx,str4
+                    call cprint                    
+                    
+                    pop ax                
+                    mov di,hesvalue1
+                    call hex                
+                    mov cx,2
+                            
+                    mov bx,hesvalue1
+                    call cprint
+                    mov cx,1
+                            
+                    mov bx,str4
+                    call cprint                                                                                 
+                    pop ax                
+                    mov al,ah
+                    mov di,hesvalue1
+                    call hex       
+                    mov cx,2
+                            
+                    mov bx,hesvalue1
+                    call cprint        
+                                 
+                               
+                                                                  
+                                                                      
+                                        
+                                         
+                     
                           
           exitdo:                
-                                    
-                                    
-                    exit:                
+                    mov bx,str3
+                    call len
+                    mov cx,ax        
+                    mov bx,str3
+                    call cprint   
+call backs
+                                   
+                    exit:     
+                              ;retf           
                               int 20h                
                               xor ah,ah
                               int 21h                
                                              
-                
 halt:
-jmp halt
+jmp halt               
+
 fill32:                
           push eax                
           push ebx                
@@ -287,8 +325,262 @@ print32:
           pop eax                
           RET                
                
+scrollup:
+          push eax                
+          push ebx                
+          push ecx                
+          push edx                
+          push esi                
+          push edi                
+          push ebp                
+          push ds                
+          mov ax,0                
+          mov ds,ax
+          mov edi,0b8000h
+          mov esi,0b8000h+160  
+          mov ecx,80*24*2
+          mov edx,1
+          call copymem32
+          pop ds                
+          pop ebp                
+          pop edi                
+          pop esi                
+          pop edx                
+          pop ecx                 
+          pop ebx                
+          pop eax                
+          RET          
 
-color dw 07h
-text1 db 18,"hello world.....",13,10,0
+printf:                
+          push ax                
+          push bx                
+          xor bh,bh
+          mov bl,70h
+          mov ah,0eh
+          int 10h                
+          pop bx                
+          pop ax                
+          RET                
+                
+                
+getchar:                
+          xor ax,ax
+          int 16h                
+          RET                
+                
+                
+getstr:                
+          push ax                
+          push bx                
+          push cx                
+          push dx                
+          mov dx,cx
+          GETSTR1:                
+                    call getchar
+                    cmp al,7                
+                    JNZ GETSTR2
+                    inc cx                
+                    dec bx                
+                    cmp cx,dx
+                    JB GETSTR2
+                    inc bx                
+                    mov cx,dx
+                    GETSTR2:                
+                    cmp al,13
+                    JZ GETSTR3
+                    mov [bx],al
+                    call printf
+                    inc bx                
+                    dec cx                
+                    cmp cx,0                
+                    JA GETSTR1 
+          GETSTR3:                
+          pop dx                
+          pop cx                
+          pop bx                
+          pop ax                
+          RET                
+                
+                
+backs:
+          push ax                
+          push bx                
+          push cx                
+          push dx                
+          push di                
+          push si                
+          push bp                
+          push es    
+          mov edi,0b8001h
+          mov ecx,80*26
+          mov al,017h
+          mov edx,2
+          call fill32
+          mov edi,0b8000h
+          mov ecx,80*26
+          mov al,32
+          mov edx,2
+          pop es                
+          pop bp                
+          pop si                
+          pop di                
+          pop dx                
+          pop cx                
+          pop bx                
+          pop ax                
+          RET                       
+                
+cprint:                
+          push ax                
+          push bx                
+          push cx                
+          push dx                
+          CPRINT1:               
+                    mov al,[bx]
+                    call printf
+                    inc bx                
+                    dec cx                
+                    cmp cx,0                
+                    JNZ CPRINT1
+          pop dx                
+          pop cx                
+          pop bx                
+          pop ax                
+          RET     
+
+len:                
+          push bx                
+          push cx                
+          push dx                
+          mov cx,0                
+          LEN1:                
+                    mov al,[bx]
+                    cmp al,0                
+                    JZ LEN2                
+                    inc bx                
+                    inc cx                
+                    cmp cx,0                
+                    JNZ LEN1                
+          LEN2:                
+          mov ax,cx
+          pop dx                
+          pop cx                
+          pop bx                
+          RET                
+
+timer:                
+          push ebx                
+          push ecx                
+          push edx                
+          push edi                
+          push esi                
+          push ebp                
+          push ds                
+          push es                
+                          
+          mov ax,40h
+          mov ds,ax
+          mov bx,6ch
+          ds
+          mov eax,[bx]
+                          
+          pop es                
+          pop ds                
+          pop ebp                
+          pop esi                
+          pop edi                
+          pop edx                
+          pop ecx                
+          pop ebx                
+          RET                
+                
+                
+                
+                
+                
+sleep:                
+          push ebx                
+          push ecx                
+          push edx                
+          push edi                
+          push esi                
+          push ebp                
+          push ds                
+          push es                
+          mov ecx,eax
+          mov ebx,eax
+          call timer
+          clc                
+          add ebx,eax
+          mov ecx,ebx
+          JO SLEEP5
+          SLEEP1:                
+                    call timer
+                    cmp eax,ecx
+                    JB SLEEP1
+          JMP SLEEP6
+          SLEEP5:                
+          call timer
+          cmp eax,ecx
+          JA SLEEP5
+JMP SLEEP1
+SLEEP6:                
+                
+pop es                
+pop ds                
+pop ebp                
+pop esi                
+pop edi                
+pop edx                
+pop ecx                
+pop ebx                
+RET  
+hhex1: db 16
+hhex: db "0123456789ABCDEF.$",0
+                
+hex:                
+          push ax                
+          push bx                
+          push dx                
+          push esi                
+          push edi                
+          push ds                
+                          
+          inc di                           
+          xor ah,ah
+          mov dx,ax
+          and ax,0fh
+          cs
+          mov si,hhex
+          clc                
+          add si,ax
+          cs 
+          mov al,[si]
+          ds
+          mov [di],al
+          dec edi                
+          mov ax,dx
+          and ax,0f0h
+          shr ax,4                
+          mov si,hhex
+          clc                
+          add si,ax 
+          cs
+          mov al,[si]
+          ds
+          mov [di],al
+                          
+          pop ds                
+          pop edi                
+          pop esi                
+          pop dx                
+          pop bx                
+          pop ax                
+          RET                                              
+text1 db 22,"input a string.....",13,10,0
 string2 db "$",0
-
+file1 db "list.txt"
+str2 db 13,10,"turn off pc",13,10,0
+str3 db 13,10,13,10,0
+str4 db ":",0
+endf db "          .                                                               "
