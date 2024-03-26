@@ -33,7 +33,7 @@ call backs
          call cprint                 
 mov bx,endf
 mov cx,79
-;call getstr
+
          mov bx,endf
          call len
          mov cx,2
@@ -751,4 +751,4 @@ exch dd 0
 spc db " ",0
 str2 db 13,10,">"
 endf db "load.exe",0
-endf2 db "
+endf2 db "                                                                                               "
